@@ -12,7 +12,7 @@ export const createApp = ({ taskModel, subTaskModel, userModel, questionModel, t
     const app = express();
     app.disable('x-powered-by');
     app.use(express.json());
-    app.use(corsMiddleware({ acceptedOrigins: ['http://localhost:5173']}));
+    app.use(corsMiddleware({ acceptedOrigins: ['http://localhost:3000']}));
 
     // Api routes
 
