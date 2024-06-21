@@ -6,20 +6,13 @@ import { createUsersRouter } from './routes/users.js';
 import { createQuestionsRouter } from './routes/questions.js';
 import { createTasksStatusRouter } from './routes/tasks-status.js'
 import { createTasksGroupRouter } from './routes/tasks-group.js';
-// import { corsMiddleware } from './middlewares/cors.js';
+import { corsMiddleware } from './middlewares/cors.js';
 
 export const createApp = ({ taskModel, subTaskModel, userModel, questionModel, taskStatusModel, taskGroupModel }) => {
     const app = express();
     app.disable('x-powered-by');
     app.use(express.json());
-    // app.use(corsMiddleware());
-    app.use((req, res, next) => {
-        res.set('Access-Control-Allow-Credentials', 'true');
-        res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
-        res.set('Access-Control-Allow-Headers', 'Content-Type');
-        res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-        next();
-    })
+    app.use(corsMiddleware({ acceptedOrigins: ['http://localhost:5173']}));
 
     // Api routes
 
