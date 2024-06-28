@@ -10,5 +10,13 @@ const config = {
     database: process.env.MYSQL_ADDON_DB || 'makeitdb',
 }
 
+const devConfig = {
+    host: 'localhost',
+    port: 3306,
+    user: 'root',
+    password: 'root',
+    database: 'makeitdb',
+}
 
-export const connection = await mysql.createConnection(config);
+
+export const connection = await mysql.createConnection(devConfig);

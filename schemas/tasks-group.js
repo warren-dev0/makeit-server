@@ -4,7 +4,11 @@ const taskGroupSchema = z.object({
     description: z.string({
         invalid_type_error: 'Group description must be a string',
         required_error: 'Group description is required.'
-    })
+    }),
+    color: z.string({
+        invalid_type_error: 'Group color must be a string',
+        required_error: 'Group color is required.'
+    }),
 });
 
 export function validateTaskGroup(object) {

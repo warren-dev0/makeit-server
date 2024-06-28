@@ -13,10 +13,10 @@ export class TaskGroupModel {
         if(user.length === 0) return null;
 
         const [tasksGroupNotMappered] = await connection.query(
-            'SELECT group_id, group_des FROM task_group WHERE user_id IS NULL OR (BIN_TO_UUID(user_id)) = ?', [userId]
+            'SELECT group_id, group_des, group_color FROM task_group WHERE group_id = 1 OR (BIN_TO_UUID(user_id)) = ?', [userId]
         );
 
-        if (tasksGroupNotMappered.length >= 1) return null;
+        if (tasksGroupNotMappered.length === 0) return null;
 
         const tasksGroup = tasksGroupNotMappered.map(taskGroup => {
             return taskGroupMapperFromMySQL(taskGroup);
@@ -37,9 +37,6 @@ export class TaskGroupModel {
 
         if (user.length === 0) return null;
 
-        const [taskGroupUuid] = await connection.query('SELECT UUID() uuid;');
-        const [{ uuid }] = taskGroupUuid;
-
         const newTaskGroup = taskGroupMapperToMySQL({ description, color });
 
         Object.keys(newTaskGroup).forEach((key) => {
@@ -48,14 +45,14 @@ export class TaskGroupModel {
 
         try {
             await connection.query(
-                `INSERT INTO task_group SET BIN_TO_UUID(group_id) = ?, group_des = ?, group_color = ? user_id = UUID_TO_BIN(?);`, [uuid, description, color, userId]
+                `INSERT INTO task_group SET group_des = ?, group_color = ? user_id = UUID_TO_BIN(?);`, [description, color, userId]
             );
         } catch (e) {
             throw new Error('Error creating task group');
         }
 
         let [createdTaskGroup] = await connection.query(
-            'SELECT BIN_TO_UUID(group_id) group_id, group_des, group_color FROM task_group WHERE BIN_TO_UUID(group_id) = ?;', [uuid]
+            'SELECT group_id, group_des, group_color FROM task_group WHERE group_des = ? AND group_color = ? AND user_id = UUID_TO_BIN(?);', [description, color, userId]
         );
 
         createdTaskGroup = taskGroupMapperFromMySQL(createdTaskGroup[0]);
@@ -89,14 +86,14 @@ export class TaskGroupModel {
 
         try {
             await connection.query(
-                `UPDATE task_group SET ${updateQuery} WHERE BIN_TO_UUID(group_id) = ?;`, [...values, groupId]
+                `UPDATE task_group SET ${updateQuery} WHERE group_id = ?;`, [...values, groupId]
             );
         } catch (e) {
             throw new Error('Error updating task group');
         }
 
         let [updatedTaskGroup] = await connection.query(
-            'SELECT BIN_TO_UUID(group_id) group_id, group_des, group_color FROM task_group WHERE BIN_TO_UUID(group_id) = ?;', [groupId]
+            'SELECT group_id, group_des, group_color FROM task_group WHERE group_id = ?;', [groupId]
         );
 
         updatedTaskGroup = taskGroupMapperFromMySQL(updatedTaskGroup[0]);
@@ -112,14 +109,14 @@ export class TaskGroupModel {
     static async delete({ groupId }) {
 
         const [taskGroup] = await connection.query(
-            'SELECT * FROM task_group WHERE BIN_TO_UUID(group_id) = ?;', [groupId]
+            'SELECT * FROM task_group WHERE group_id = ?;', [groupId]
         );
 
         if (taskGroup.length === 0) return null;
 
         try {
             const [taskGroupDeleted] = await connection.query(
-                'DELETE FROM task_group WHERE BIN_TO_UUID(group_id) = ?;', [groupId]
+                'DELETE FROM task_group WHERE group_id = ?;', [groupId]
             );
 
             return taskGroupDeleted;
