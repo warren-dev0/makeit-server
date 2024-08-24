@@ -29,6 +29,9 @@ export class SubTaskModel {
 
         if (task.length === 0) return null;
 
+        console.log(taskId);
+        console.log(task);
+
         const [subTaskUuid] = await connection.query('SELECT UUID() uuid;');
         const [{ uuid }] = subTaskUuid;
 

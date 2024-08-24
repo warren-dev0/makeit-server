@@ -7,10 +7,10 @@ export class TaskGroupModel {
     static async getByUser({ userId }) {
 
         const user = connection.query(
-            'SELECT * FROM users WHERE (BIN_TO_UUID(user_id)) = ?',[userId]
+            'SELECT * FROM users WHERE (BIN_TO_UUID(user_id)) = ?', [userId]
         );
 
-        if(user.length === 0) return null;
+        if (user.length === 0) return null;
 
         const [tasksGroupNotMappered] = await connection.query(
             'SELECT group_id, group_des, group_color FROM task_group WHERE group_id = 1 OR (BIN_TO_UUID(user_id)) = ?', [userId]
@@ -25,19 +25,41 @@ export class TaskGroupModel {
         return tasksGroup;
     };
 
-    static async create({ userId, input }) {
+    static async getById({ groupId }) {
+
+        const user = connection.query(
+            'SELECT * FROM task_group WHERE group_id = ?', [groupId]
+        );
+
+        if (user.length === 0) return null;
+
+        const [tasksGroupNotMappered] = await connection.query(
+            'SELECT group_id, group_des, group_color FROM task_group WHERE group_id = ?', [groupId]
+        );
+
+        if (tasksGroupNotMappered.length === 0) return null;
+
+        const tasksGroup = tasksGroupNotMappered.map(taskGroup => {
+            return taskGroupMapperFromMySQL(taskGroup);
+        })
+
+        return tasksGroup;
+    };
+
+    static async create({ input }) {
         const {
             description,
-            color
+            color,
+            userId
         } = input;
 
-        const [user] = connection.query(
+        const user = connection.query(
             'SELECT * FROM users WHERE (BIN_TO_UUID(user_id)) = ?', [userId]
         );
 
         if (user.length === 0) return null;
 
-        const newTaskGroup = taskGroupMapperToMySQL({ description, color });
+        const newTaskGroup = taskGroupMapperToMySQL({ description, color, userId });
 
         Object.keys(newTaskGroup).forEach((key) => {
             if (newTaskGroup[key] === undefined || newTaskGroup[key] === null || newTaskGroup[key] === '') delete newTaskGroup[key];
@@ -45,7 +67,7 @@ export class TaskGroupModel {
 
         try {
             await connection.query(
-                `INSERT INTO task_group SET group_des = ?, group_color = ? user_id = UUID_TO_BIN(?);`, [description, color, userId]
+                `INSERT INTO task_group SET group_des = ?, group_color = ?, user_id = UUID_TO_BIN(?);`, [description, color, userId]
             );
         } catch (e) {
             throw new Error('Error creating task group');

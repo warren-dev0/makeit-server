@@ -8,7 +8,8 @@ export const createTasksGroupRouter = ({ taskGroupModel }) => {
     const taskGroupController = new TaskGroupController({ taskGroupModel })
 
     tasksGroupRouter.get('/:userId', taskGroupController.getByUser);
-    tasksGroupRouter.post('/:userId', taskGroupController.create);
+    tasksGroupRouter.get('/id/:groupId', taskGroupController.getById);
+    tasksGroupRouter.post('/', taskGroupController.create);
     tasksGroupRouter.patch('/:groupId', taskGroupController.update);
     tasksGroupRouter.delete('/:groupId', taskGroupController.delete);
 

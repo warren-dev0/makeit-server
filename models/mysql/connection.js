@@ -3,20 +3,13 @@ import dotenv from 'dotenv/config';
 
 // MySQL connection
 const config = {
-    host: process.env.MYSQL_ADDON_HOST || 'localhost',
-    port: process.env.MYSQL_ADDON_POR || 3306,
-    user: process.env.MYSQL_ADDON_USER || 'root',
-    password: process.env.MYSQL_ADDON_PASSWORD || 'root',
-    database: process.env.MYSQL_ADDON_DB || 'makeitdb',
-}
-
-const devConfig = {
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: 'root',
-    database: 'makeitdb',
+    host: process.env.MYSQL_ADDON_HOST,
+    port: process.env.MYSQL_ADDON_POR,
+    user: process.env.MYSQL_ADDON_USER,
+    password: process.env.MYSQL_ADDON_PASSWORD,
+    database: process.env.MYSQL_ADDON_DB,
+    waitForConnections: true,
 }
 
 
-export const connection = await mysql.createConnection(devConfig);
+export const connection = await mysql.createConnection(config);

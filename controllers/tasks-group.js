@@ -13,11 +13,17 @@ export class TaskGroupController {
         res.status(404).json({ message: 'Task group not found' });
     };
 
+    getById = async (req, res) => {
+        const { groupId } = req.params;
+        const taskGroup = await this.taskGroupModel.getById({ groupId });
+        if (taskGroup) return res.json(taskGroup);
+        res.status(404).json({ message: 'Task group not found' });
+    };
+
     create = async (req, res) => {
         const result = validateTaskGroup(req.body);
         if (result.error) return res.status(400).json({ error: JSON.parse(result.error.message) })
-        const { userId } = req.params;
-        const newTaskGroup = await this.taskGroupModel.create({ userId, input: result.data });
+        const newTaskGroup = await this.taskGroupModel.create({ input: result.data });
         if (!newTaskGroup) return res.status(404).json({ message: 'Task group not found' });
         res.status(201).json(newTaskGroup)
     };

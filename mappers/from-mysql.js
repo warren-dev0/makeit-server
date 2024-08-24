@@ -37,6 +37,7 @@ export const taskMapperFromMySQL = (task) => {
         task_due_date,
         task_des,
         task_created_date,
+        task_myday,
         status_id,
         group_id,
         user_id
@@ -48,6 +49,7 @@ export const taskMapperFromMySQL = (task) => {
         dueDate: task_due_date,
         description: task_des,
         createdDate: task_created_date,
+        myDay: task_myday,
         statusId: status_id,
         groupId: group_id,
         userId: user_id

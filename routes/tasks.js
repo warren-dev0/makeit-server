@@ -7,6 +7,8 @@ export const createTasksRouter = ({ taskModel }) => {
 
     const taskController = new TaskController({ taskModel })
 
+    tasksRouter.get('/', taskController.getById);
+
     tasksRouter.get('/:userId', taskController.getByUser);
 
     tasksRouter.post('/', taskController.create);

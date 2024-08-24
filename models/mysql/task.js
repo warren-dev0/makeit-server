@@ -4,9 +4,23 @@ import { taskMapperFromMySQL } from '../../mappers/from-mysql.js';
 
 export class TaskModel {
 
+    static async getById({ taskId }) {
+        const [taskNotMappered] = await connection.query(
+            'SELECT BIN_TO_UUID(task_id) task_id, task_title, task_due_date, task_des, task_created_date, task_myday, status_id, group_id, BIN_TO_UUID(user_id) user_id FROM tasks WHERE BIN_TO_UUID(task_id) = ?;', [taskId]
+        );
+
+        if (taskNotMappered.length === 0) return null;
+
+        const task = taskNotMappered.map(task => {
+            return taskMapperFromMySQL(task);
+        })
+
+        return task[0];
+    };
+
     static async getByUser({ userId }) {
         const [tasksNotMappered] = await connection.query(
-            'SELECT BIN_TO_UUID(task_id) task_id, task_title, task_due_date, task_des, task_created_date, status_id, group_id, BIN_TO_UUID(user_id) user_id FROM tasks WHERE BIN_TO_UUID(user_id) = ?;', [userId]
+            'SELECT BIN_TO_UUID(task_id) task_id, task_title, task_due_date, task_des, task_created_date, task_myday,  status_id, group_id, BIN_TO_UUID(user_id) user_id FROM tasks WHERE BIN_TO_UUID(user_id) = ?;', [userId]
         );
 
         if (tasksNotMappered.length === 0) return null;
@@ -23,6 +37,8 @@ export class TaskModel {
             title,
             dueDate,
             description,
+            myday,
+            statusId,
             groupId,
             userId
         } = input;
@@ -38,9 +54,9 @@ export class TaskModel {
 
         const createdDate = new Date();
 
-        const statusId = 1;
+        const newTask = taskMapperToMySQL({ title, dueDate, description, myday, createdDate, statusId, groupId });
 
-        const newTask = taskMapperToMySQL({ title, dueDate, description, createdDate, statusId, groupId });
+        newTask.task_due_date = newTask.task_due_date ? new Date(newTask.task_due_date) : new Date();
 
         Object.keys(newTask).forEach((key) => {
             if(newTask[key] === undefined || newTask[key] === null || newTask[key] === '') delete newTask[key];
@@ -63,7 +79,7 @@ export class TaskModel {
         }
 
         let [createdTask] = await connection.query(
-            'SELECT BIN_TO_UUID(task_id) task_id, task_title, task_due_date, task_des, task_created_date, status_id, group_id, BIN_TO_UUID(user_id) user_id FROM tasks WHERE BIN_TO_UUID(task_id) = ?;', [uuid]
+            'SELECT BIN_TO_UUID(task_id) task_id, task_title, task_due_date, task_des, task_myday, task_created_date, status_id, group_id, BIN_TO_UUID(user_id) user_id FROM tasks WHERE BIN_TO_UUID(task_id) = ?;', [uuid]
         );
 
         createdTask = taskMapperFromMySQL(createdTask[0]);
@@ -78,7 +94,8 @@ export class TaskModel {
             dueDate,
             description,
             groupId,
-            statusId
+            statusId,
+            myday
         } = input;
 
         const [task] = await connection.query(
@@ -87,7 +104,7 @@ export class TaskModel {
 
         if (task.length === 0) return null;
 
-        const valuesToUpdate = taskMapperToMySQL({ title, dueDate, description, groupId, statusId });
+        const valuesToUpdate = taskMapperToMySQL({ title, dueDate, description, myday, groupId, statusId });
 
         Object.keys(valuesToUpdate).forEach((key) => {
             if(valuesToUpdate[key] === undefined || valuesToUpdate[key] === null || valuesToUpdate[key] === '') delete valuesToUpdate[key];
@@ -108,7 +125,7 @@ export class TaskModel {
         }
 
         let [updatedTask] = await connection.query(
-            'SELECT BIN_TO_UUID(task_id) task_id, task_title, task_due_date, task_des, task_created_date, status_id, group_id, BIN_TO_UUID(user_id) user_id FROM tasks WHERE BIN_TO_UUID(task_id) = ?;', [taskId]
+            'SELECT BIN_TO_UUID(task_id) task_id, task_title, task_due_date, task_des, task_myday, task_created_date, status_id, group_id, BIN_TO_UUID(user_id) user_id FROM tasks WHERE BIN_TO_UUID(task_id) = ?;', [taskId]
         );
 
         updatedTask = taskMapperFromMySQL(updatedTask[0]);

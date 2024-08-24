@@ -42,7 +42,13 @@ export class UserModel {
 
         const user = userMapperFromMySQL(userNotMappered[0]);
 
-        return user;
+        return {
+            id: user.id,
+            avatar: user.avatar,
+            email: user.email,
+            name: user.name,
+            dateCreated: user.dateCreated
+        };
     };
 
     static async create({ input }) {

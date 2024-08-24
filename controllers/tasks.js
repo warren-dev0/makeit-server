@@ -6,6 +6,14 @@ export class TaskController {
         this.taskModel = taskModel;
     }
 
+    getById = async (req, res) => {
+        const {taskId} = req.query;
+        if (!taskId) return res.status(400).json({ message: 'Task id is required' });
+        const task = await this.taskModel.getById({taskId});
+        if (task) return res.json(task);
+        res.status(404).json({ message: 'Task not found' });
+    };
+
     getByUser = async (req, res) => {
         const { userId } = req.params;
         const tasks = await this.taskModel.getByUser({ userId });
@@ -34,6 +42,6 @@ export class TaskController {
         const { taskId } = req.params;
         const deletedTask = await this.taskModel.delete({ taskId });
         if (!deletedTask) return res.status(404).json({ message: 'Task not found' });
-        return res.json({ message: 'Task deleted' });
+        return res.json(deletedTask);
     }
 }

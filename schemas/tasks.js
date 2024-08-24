@@ -7,6 +7,7 @@ const taskSchema = z.object({
     }),
     dueDate: z.string().optional(),
     description: z.string().optional(),
+    myday: z.number().int().min(0).max(1).default(0),
     groupId: z.number().int().positive().default(1),
     statusId: z.number().int().positive().default(1),
     userId: z.string(),

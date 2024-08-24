@@ -9,6 +9,10 @@ const taskGroupSchema = z.object({
         invalid_type_error: 'Group color must be a string',
         required_error: 'Group color is required.'
     }),
+    userId: z.string({
+        invalid_type_error: 'User ID must be a string',
+        required_error: 'User ID is required.'
+    })
 });
 
 export function validateTaskGroup(object) {
