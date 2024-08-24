@@ -33,5 +33,5 @@ export const createApp = ({ taskModel, subTaskModel, userModel, questionModel, t
         console.log(`server is running on port http://localhost:${PORT}`);
     });
 
-    module.exports = app;
+    return app;
 }
