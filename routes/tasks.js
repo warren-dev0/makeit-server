@@ -17,5 +17,7 @@ export const createTasksRouter = ({ taskModel }) => {
 
     tasksRouter.delete('/:taskId', taskController.delete);
 
+    tasksRouter.delete('/group/:groupId', taskController.deleteByGroup);
+
     return tasksRouter;
 }

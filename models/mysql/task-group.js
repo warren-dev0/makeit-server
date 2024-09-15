@@ -89,8 +89,10 @@ export class TaskGroupModel {
             color
         } = input;
 
+        if(groupId === 1) return null;
+
         const [taskGroup] = await connection.query(
-            'SELECT * FROM task_group WHERE BIN_TO_UUID(group_id) = ?;', [groupId]
+            'SELECT * FROM task_group WHERE group_id = ?;', [groupId]
         );
 
         if (taskGroup.length === 0) return null;

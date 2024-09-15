@@ -157,4 +157,26 @@ export class TaskModel {
             return false;
         }
     };
+
+    static async deleteByGroup({ groupId }) {
+
+        if(groupId == 1) return false;
+
+        const [task] = await connection.query(
+            'SELECT * FROM tasks WHERE group_id = ?;', [groupId]
+        );
+
+        if (task.length === 0) return null;
+
+        try {
+            const [taskDeleted] = await connection.query(
+                'DELETE FROM tasks WHERE group_id = ?;',
+                [groupId]
+            );
+
+            return taskDeleted;
+        } catch (e) {
+            return false;
+        }
+    };
 }

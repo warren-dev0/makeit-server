@@ -11,9 +11,15 @@ export const createUsersRouter = ({ userModel }) => {
 
     userRouter.get('/:userId', userController.getById);
 
+    userRouter.get('/:userId/questions', userController.getUserQuestions);
+
+    userRouter.get('/username/:username', userController.getByName);
+
     userRouter.post('/', userController.create);
 
     userRouter.patch('/:userId', userController.update);
+
+    userRouter.patch('/:userId/forgot', userController.updateForgotPassword);
 
     userRouter.delete('/:userId', userController.delete);
 

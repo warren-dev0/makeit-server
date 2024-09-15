@@ -51,6 +51,39 @@ export class UserModel {
         };
     };
 
+    static async getUserQuestions({ userId }) {
+        const [userNotMappered] = await connection.query(
+            'SELECT BIN_TO_UUID(user_id) user_id, user_name, user_1question, user_2question, user_3question FROM users WHERE BIN_TO_UUID(user_id) = ?;', [userId]
+        );
+
+        if(userNotMappered.length === 0) return null;
+
+        const user = userMapperFromMySQL(userNotMappered[0]);
+
+        return {
+            id: user.id,
+            name: user.name,
+            firstQuestion: user.firstQuestion,
+            secondQuestion: user.secondQuestion,
+            thirdQuestion: user.thirdQuestion
+        };
+    };
+
+    static async getByName({ username }) {
+        const [userNotMappered] = await connection.query(
+            'SELECT BIN_TO_UUID(user_id) user_id, user_avatar, user_email, user_name, user_pass, user_1question, user_1answer, user_2question, user_2answer, user_3question, user_3answer, user_date_created FROM users WHERE user_name = ?;', [username]
+        );
+
+        if (userNotMappered.length === 0) return null;
+
+        const user = userMapperFromMySQL(userNotMappered[0]);
+
+        return {
+            id: user.id,
+            name: user.name,
+        };
+    };
+
     static async create({ input }) {
         const {
             avatar,
@@ -137,13 +170,20 @@ export class UserModel {
         );
         
         if (user.length === 0) return null;
+
+        let hashedpassword = null;
         
-        const hashedpassword = await bcrypt.hash(password, 10);
+        try {
+            hashedpassword = await bcrypt.hash(password, 10);
+        }
+        catch (e) {
+            console.error('Error hashing password');
+        }
 
         const valuesToUpdate = userMapperToMySQL({ avatar, hashedpassword });
 
         Object.keys(valuesToUpdate).forEach((key) => {
-            if(valuesToUpdate[key] === undefined) delete valuesToUpdate[key];
+            if(valuesToUpdate[key] === undefined || valuesToUpdate[key] === null || valuesToUpdate[key] === '') delete valuesToUpdate[key];
         });
 
         const keys = Object.keys(valuesToUpdate);
@@ -160,13 +200,65 @@ export class UserModel {
             throw new Error('Error updating user');
         }
 
-        const [updatedUser] = await connection.query(
+        let [updatedUser] = await connection.query(
             'SELECT BIN_TO_UUID(user_id) user_id, user_avatar, user_name FROM users WHERE BIN_TO_UUID(user_id) = ?;', [userId]
         );
+
+        updatedUser = userMapperFromMySQL(updatedUser[0]);
+
+        Object.keys(updatedUser).forEach((key) => {
+            if (updatedUser[key] === undefined || updatedUser[key] === null || updatedUser[key] === '') delete updatedUser[key];
+        });
 
         return updatedUser[0];
 
     };
+
+    static async updateForgotPassword({ userId, input }) {
+        const {
+            firstAnswer,
+            secondAnswer,
+            thirdAnswer,
+            password
+        } = input;
+        
+        const [user] = await connection.query(
+            'SELECT * FROM users WHERE BIN_TO_UUID(user_id) = ?;', [userId]
+        );
+
+        if (user.length === 0) return null;
+
+        const firstAnswerValidation = await bcrypt.compare(firstAnswer, user[0].user_1answer);
+        const secondAnswerValidation = await bcrypt.compare(secondAnswer, user[0].user_2answer);
+        const thirdAnswerValidation = await bcrypt.compare(thirdAnswer, user[0].user_3answer);
+
+        
+        if (!firstAnswerValidation || !secondAnswerValidation || !thirdAnswerValidation) return null;
+        
+        const newHashedpassword = await bcrypt.hash(password, 10);
+
+        try {
+            await connection.query(
+                'UPDATE users SET user_pass = ? WHERE BIN_TO_UUID(user_id) = ?;',
+                [newHashedpassword, userId]
+            );
+        } catch (e) {
+            throw new Error('Error updating password');
+        }
+
+        let [updatedUser] = await connection.query(
+            'SELECT BIN_TO_UUID(user_id) user_id, user_avatar, user_name FROM users WHERE BIN_TO_UUID(user_id) = ?;', [userId]
+        );
+
+        updatedUser = userMapperFromMySQL(updatedUser[0]);
+
+        Object.keys(updatedUser).forEach((key) => {
+            if (updatedUser[key] === undefined || updatedUser[key] === null || updatedUser[key] === '') delete updatedUser[key];
+        });
+
+        return updatedUser;
+
+    }
 
     static async delete({ userId }) {
         try {

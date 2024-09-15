@@ -44,4 +44,11 @@ export class TaskController {
         if (!deletedTask) return res.status(404).json({ message: 'Task not found' });
         return res.json(deletedTask);
     }
+
+    deleteByGroup = async (req, res) => {
+        const { groupId } = req.params;
+        const deletedTask = await this.taskModel.deleteByGroup({ groupId });
+        if (!deletedTask) return res.status(404).json({ message: 'Tasks not found' });
+        return res.json(deletedTask);
+    }
 }

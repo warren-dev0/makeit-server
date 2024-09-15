@@ -21,6 +21,20 @@ export class UserController {
         res.status(404).json({ message: 'User not found' });
     };
 
+    getUserQuestions = async (req, res) => {
+        const { userId } = req.params;
+        const userQuestions = await this.userModel.getUserQuestions({ userId });
+        if (userQuestions) return res.json(userQuestions);
+        res.status(404).json({ message: 'User not found' });
+    }
+
+    getByName = async (req, res) => {
+        const { username } = req.params;
+        const user = await this.userModel.getByName({ username })
+        if(user) return res.json(user)
+        res.status(404).json({ message: 'User not found' })
+    }
+
     create = async (req, res) => {
         const result = validateUser(req.body);
         if (result.error) return res.status(400).json({ error: JSON.parse(result.error.message) })
@@ -37,6 +51,15 @@ export class UserController {
         if (!updatedUser) return res.status(404).json({ message: 'User not found' })
         return res.json(updatedUser);
     };
+
+    updateForgotPassword = async (req, res) => {
+        const result = validatePartialUser(req.body);
+        if (!result.success) return res.status(404).json({ error: JSON.parse(result.error.message) });
+        const { userId } = req.params;
+        const updatedUser = await this.userModel.updateForgotPassword({ userId, input: result.data });
+        if (!updatedUser) return res.status(404).json({ message: 'User not found' });
+        return res.json(updatedUser);
+    }
 
     delete = async (req, res) => {
         const { userId } = req.params;
