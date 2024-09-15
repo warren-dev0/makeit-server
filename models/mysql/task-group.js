@@ -132,6 +132,8 @@ export class TaskGroupModel {
 
     static async delete({ groupId }) {
 
+        if(groupId === 1) return null;
+
         const [taskGroup] = await connection.query(
             'SELECT * FROM task_group WHERE group_id = ?;', [groupId]
         );
